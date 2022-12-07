@@ -3,7 +3,7 @@
 #include <math.h>
 
 
-#define ARRAYSIZE 32
+#define ARRAYSIZE 16
 
 double determinantOfMatrix(double * mat, int n);
 void swap(double *p,double *q);
@@ -105,8 +105,8 @@ double determinantOfMatrix(double *mat, int n)
 
 void swap(double *p,double *q)
 {
-    //p=&n1 so p store the address of n1, so *p store the value of n1
-    //q=&n2 so q store the address of n2, so *q store the value of n2
+	//p=&n1 so p store the address of n1, so *p store the value of n1
+	//q=&n2 so q store the address of n2, so *q store the value of n2
 
     double tmp;
     tmp = *p; // tmp store the value of n1
