@@ -3,20 +3,20 @@
 #include <math.h>
 
 
-#define ARRAYSIZE 16
+#define ARRAYSIZE 32
 
-int determinantOfMatrix(int* mat, int n);
-void swap(int *p,int *q);
+double determinantOfMatrix(double * mat, int n);
+void swap(double *p,double *q);
 
 
 int main(int argc, char *argv[])
 {
     char f_name[50];
-    double a[ARRAYSIZE][ARRAYSIZE];
+    double * a = calloc(ARRAYSIZE*ARRAYSIZE, sizeof(double));
     int i,j;
     double det;
     //Create filename
-    sprintf(f_name,"DET_DATA/m0032x0032.bin");
+    sprintf(f_name,"../DET_DATA/m0032x0032.bin");
     printf("Reading array file %s of size %dx%d\n",f_name,ARRAYSIZE,ARRAYSIZE);
     //Open file
     FILE *datafile=fopen(f_name,"rb");
@@ -24,22 +24,24 @@ int main(int argc, char *argv[])
     for (i=0; i< ARRAYSIZE; i++)
         for (j=0; j< ARRAYSIZE; j++)
         {
-            fread(&a[i][j],sizeof(double),1,datafile);
-            printf("a[%d][%d]=%f\n",i,j,a[i][j]);
+            fread(&a[i * ARRAYSIZE +j],sizeof(double),1,datafile);
+            printf("a[%d][%d]=%f\n",i,j,a[i * ARRAYSIZE +j]);
         }
     printf("Matrix has been read.\n");
 
     //Calculate determinant
-
+    det = determinantOfMatrix(a,ARRAYSIZE);
+    printf("Determinant of the matrix is: %f\n",det);
 }
 
-int determinantOfMatrix(int* mat, int n)
+double determinantOfMatrix(double *mat, int n)
 {
-    int num1, num2, det = 1, index,
+    double num1, num2, det = 1,
             total = 1; // Initialize result
+    int  index;
 
     // temporary array for storing row
-    int temp[n + 1];
+    double temp[n + 1];
 
     // loop for traversing the diagonal elements
     for (int i = 0; i < n; i++)
@@ -101,12 +103,12 @@ int determinantOfMatrix(int* mat, int n)
     return (det / total); // Det(kA)/k=Det(A);
 }
 
-void swap(int *p,int *q)
+void swap(double *p,double *q)
 {
     //p=&n1 so p store the address of n1, so *p store the value of n1
     //q=&n2 so q store the address of n2, so *q store the value of n2
 
-    int tmp;
+    double tmp;
     tmp = *p; // tmp store the value of n1
     *p=*q;    // *p store the value of *q that is value of n2
     *q=tmp;   // *q store the value of tmp that is the value of n1
