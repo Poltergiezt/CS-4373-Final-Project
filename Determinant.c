@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 	int i, j;
 	double det;
 	// Create filename
-	sprintf(fileName, "DET_DATA/m0032x0032.bin");
+	sprintf(fileName, "../DET_DATA/m0016x0016.bin");
 	printf("Reading array file %s of size %dx%d\n", fileName, ARRAY_SIZE, ARRAY_SIZE);
 	// Open file
 	FILE* dataFile = fopen(fileName, "rb");
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 	{
 		for(j = 0; j < ARRAY_SIZE; j++)
 		{
-			fread(&a[i][j], sizeof(double), 1, dataFile);
+			fread(&(a[i][j]), sizeof(double), 1, dataFile);
 			printf("a[%d][%d]=%f\n", i, j, a[i][j]);
 		}
 	}
