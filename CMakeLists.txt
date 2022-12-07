@@ -3,6 +3,17 @@ project(untitled C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(untitled main.c)
+include_directories(SYSTEM ${MPI_INCLUDE_PATH})
+include_directories(SYSTEM ${MSMPI_INC})
+include_directories(SYSTEM ${MSMPI_INC}/x64)
+include_directories(SYSTEM ${MSMPI_BIN})
+include_directories(SYSTEM ${MSMPI_LIB64})
+find_package(MPI REQUIRED)
+
+
+
+add_executable(Part1MPI DeterminantMPI.c)
 
 add_executable(Part1 Determinant.c)
+
+target_link_libraries(Part1MPI PUBLIC MPI::MPI_C)
