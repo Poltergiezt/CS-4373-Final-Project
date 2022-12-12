@@ -30,13 +30,6 @@ int main(int argc, char* argv[])
 			exit(1);
 		}
 		matrixSize = strtol(argv[1], NULL, 10);
-		if(matrixSize % commSize != 0)
-		{
-			fprintf(stderr,
-					"ERROR: Matrix size not evenly divisible by number of processes. Skipping current run configuration.\n");
-			MPI_Finalize();
-			exit(1);
-		}
 		char filePath[50];
 		sprintf(filePath, "../DET_DATA/");
 		char matrixSizeString[10];
@@ -91,8 +84,28 @@ int main(int argc, char* argv[])
 	}
 	MPI_Bcast(matrix, matrixSize * matrixSize, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-	int myStart = myRank * matrixSize / commSize;
-	int myEnd = (myRank + 1) * matrixSize / commSize;
+	int myStart;
+	int myEnd;
+	if(matrixSize % commSize != 0)
+	{
+		if(myRank < matrixSize % commSize)
+		{
+			// Can implement the ceiling function by allowing truncation and then adding 1.
+			myStart = myRank * (matrixSize / commSize + 1);
+			myEnd = (myRank + 1) * (matrixSize / commSize + 1);
+		}
+		else
+		{
+			// Default behavior of integer division is to truncate, so no special logic needed here.
+			myStart = myRank * (matrixSize / commSize) + matrixSize % commSize;
+			myEnd = (myRank + 1) * (matrixSize / commSize) + matrixSize % commSize;
+		}
+	}
+	else
+	{
+		myStart = myRank * (matrixSize / commSize);
+		myEnd = (myRank + 1) * (matrixSize / commSize);
+	}
 
 	double myDet = 0;
 	double myLogDet = 0;

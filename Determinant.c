@@ -7,13 +7,13 @@
 
 double determinantOfMatrix(double* matrix, int matrixSize);
 double logDeterminantOfMatrix(double* matrix, int matrixSize);
-double timeDiff(struct timespec* start, struct timespec* end);
+double timeDiff(struct timeval* start, struct timeval* end);
 
 
 int main(int argc, char* argv[])
 {
-	struct timespec programStart;
-	clock_gettime(CLOCK_REALTIME, &programStart);
+	struct timeval programStart;
+	gettimeofday(&programStart, NULL);
 	if(argc < 2)
 	{
 		fprintf(stderr, "Usage: %s matrix_size\n", argv[0]);
@@ -65,16 +65,16 @@ int main(int argc, char* argv[])
 	}
 	fclose(dataFile);
 
-	struct timespec workStart;
-	clock_gettime(CLOCK_REALTIME, &workStart);
+	struct timeval workStart;
+	gettimeofday(&workStart, NULL);
 	// Calculate determinant
 	double det = determinantOfMatrix(matrix, matrixSize);
 	double logDet = logDeterminantOfMatrix(matrix, matrixSize);
 	free(matrix);
-	struct timespec workEnd;
-	clock_gettime(CLOCK_REALTIME, &workEnd);
-	struct timespec programEnd;
-	clock_gettime(CLOCK_REALTIME, &programEnd);
+	struct timeval workEnd;
+	gettimeofday(&workEnd, NULL);
+	struct timeval programEnd;
+	gettimeofday(&programEnd, NULL);
 
 	printf("(3) %f\n", det);
 	printf("(4) %f\n", logDet);
@@ -156,7 +156,7 @@ double logDeterminantOfMatrix(double* matrix, int matrixSize)
 }
 
 
-double timeDiff(struct timespec* start, struct timespec* end)
+double timeDiff(struct timeval* start, struct timeval* end)
 {
-	return ((double) end->tv_sec - (double) start->tv_sec) + 1e-9 * (end->tv_nsec - start->tv_nsec);
+	return ((double) end->tv_sec - (double) start->tv_sec) + 1e-6 * (end->tv_usec - start->tv_usec);
 }
