@@ -149,8 +149,6 @@ int main(int argc, char* argv[])
 		free(subMatrix);
 	}
 
-	free(matrix);
-
 	// Reduce and sum all determinants.
 	double det;
 	double logDet;
@@ -175,6 +173,7 @@ int main(int argc, char* argv[])
 		printf("%f\n", programTime);
 	}
 
+	free(matrix);
 	MPI_Finalize();
 }
 
@@ -208,7 +207,7 @@ double determinantOfMatrix(double* matrix, int matrixSize)
 	 elements in principal diagonal elements */
 	for(i = 0; i < matrixSize; i++)
 	{
-		det = det * matrix[i * matrixSize + i];
+		det *= matrix[i * matrixSize + i];
 	}
 
 	return det;
@@ -244,7 +243,7 @@ double logDeterminantOfMatrix(double* matrix, int matrixSize)
 	 elements in principal diagonal elements */
 	for(i = 0; i < matrixSize; i++)
 	{
-		logDet = logDet + log10(fabs(matrix[i * matrixSize + i]));
+		logDet += log10(fabs(matrix[i * matrixSize + i]));
 	}
 
 	return logDet;
