@@ -2,24 +2,26 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include <sys/time.h>
+#include <omp.h>
 
 
 double determinantOfMatrix(double* matrix, int matrixSize);
 double logDeterminantOfMatrix(double* matrix, int matrixSize);
-double timeDiff(struct timeval* start, struct timeval* end);
+
+
+int g_threadCount;
 
 
 int main(int argc, char* argv[])
 {
-	struct timeval programStart;
-	gettimeofday(&programStart, NULL);
-	if(argc < 2)
+	double programStart = omp_get_wtime();
+	if(argc < 3)
 	{
-		fprintf(stderr, "Usage: %s matrix_size\n", argv[0]);
+		fprintf(stderr, "Usage: %s matrix_size thread_count\n", argv[0]);
 		exit(1);
 	}
 	int matrixSize = strtol(argv[1], NULL, 10);
+	g_threadCount = strtol(argv[2], NULL, 10);
 	char filePath[50];
 	sprintf(filePath, "../DET_DATA/");
 	char matrixSizeString[10];
@@ -65,28 +67,24 @@ int main(int argc, char* argv[])
 	}
 	fclose(dataFile);
 
-	struct timeval workStart;
-	gettimeofday(&workStart, NULL);
+	double workStart = omp_get_wtime();
 	// Calculate determinant
 	double det = determinantOfMatrix(matrix, matrixSize);
 	double logDet = logDeterminantOfMatrix(matrix, matrixSize);
 	free(matrix);
-	struct timeval workEnd;
-	gettimeofday(&workEnd, NULL);
-	struct timeval programEnd;
-	gettimeofday(&programEnd, NULL);
+	double workEnd = omp_get_wtime();
+	double programEnd = omp_get_wtime();
 
 	printf("(3) %.6e\n", det);
 	printf("(4) %.6e\n", logDet);
-	printf("%f\n", timeDiff(&workStart, &workEnd));
-	printf("%f\n", timeDiff(&programStart, &programEnd));
-
+	printf("%f\n", workEnd - workStart);
+	printf("%f\n", programEnd - programStart);
 }
 
 
 double determinantOfMatrix(double* matrix, int matrixSize)
 {
-	int i, j, k;
+	int i, j;
 	double det = 1;
 	double ratio;
 
@@ -98,11 +96,12 @@ double determinantOfMatrix(double* matrix, int matrixSize)
 			printf("Mathematical Error!");
 			exit(0);
 		}
+		#pragma omp parallel for num_threads(g_threadCount) default(none) private(ratio) shared(matrix, matrixSize, i)
 		for(j = i + 1; j < matrixSize; j++)
 		{
 			ratio = matrix[j * matrixSize + i] / matrix[i * matrixSize + i];
 
-			for(k = 0; k < matrixSize; k++)
+			for(int k = 0; k < matrixSize; k++)
 			{
 				matrix[j * matrixSize + k] = matrix[j * matrixSize + k] - ratio * matrix[i * matrixSize + k];
 			}
@@ -111,9 +110,10 @@ double determinantOfMatrix(double* matrix, int matrixSize)
 
 	/* Finding determinant by multiplying
 	 elements in principal diagonal elements */
+	#pragma omp parallel for num_threads(g_threadCount) default(none) reduction(*: det) shared(matrix, matrixSize)
 	for(i = 0; i < matrixSize; i++)
 	{
-		det = det * matrix[i * matrixSize + i];
+		det *= matrix[i * matrixSize + i];
 	}
 
 	return det;
@@ -122,7 +122,7 @@ double determinantOfMatrix(double* matrix, int matrixSize)
 
 double logDeterminantOfMatrix(double* matrix, int matrixSize)
 {
-	int i, j, k;
+	int i, j;
 	double logDet = 0;
 	double ratio;
 
@@ -134,11 +134,12 @@ double logDeterminantOfMatrix(double* matrix, int matrixSize)
 			printf("Mathematical Error!");
 			exit(0);
 		}
+		#pragma omp parallel for num_threads(g_threadCount) private(ratio) shared(matrix, matrixSize, i) default(none)
 		for(j = i + 1; j < matrixSize; j++)
 		{
 			ratio = matrix[j * matrixSize + i] / matrix[i * matrixSize + i];
 
-			for(k = 0; k < matrixSize; k++)
+			for(int k = 0; k < matrixSize; k++)
 			{
 				matrix[j * matrixSize + k] = matrix[j * matrixSize + k] - ratio * matrix[i * matrixSize + k];
 			}
@@ -147,16 +148,11 @@ double logDeterminantOfMatrix(double* matrix, int matrixSize)
 
 	/* Finding determinant by multiplying
 	 elements in principal diagonal elements */
+	#pragma omp parallel for num_threads(g_threadCount) reduction(+: logDet) shared(matrix, matrixSize) default(none)
 	for(i = 0; i < matrixSize; i++)
 	{
-		logDet = logDet + log10(fabs(matrix[i * matrixSize + i]));
+		logDet += log10(fabs(matrix[i * matrixSize + i]));
 	}
 
 	return logDet;
-}
-
-
-double timeDiff(struct timeval* start, struct timeval* end)
-{
-	return ((double) end->tv_sec - (double) start->tv_sec) + 1e-6 * (end->tv_usec - start->tv_usec);
 }
