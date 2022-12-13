@@ -59,6 +59,12 @@ int main(int argc, char* argv[])
 	//Generate distanceMatrix random permutation of the cities
 	int* myCurrentSolution = calloc(ARRAY_SIZE, sizeof(int));
 
+	for(i = 0; i < ARRAY_SIZE; ++i)
+	{
+		myCurrentSolution[i] = i;
+	}
+	shuffle(myCurrentSolution);
+
 	int* pertSolution = calloc(ARRAY_SIZE, sizeof(int));
 
 	//Calculate the cost of the initial solution
@@ -137,13 +143,23 @@ int main(int argc, char* argv[])
 
 	if(myBestCost == globalBestCost)
 	{
-		MPI_Send(myBestSolution, ARRAY_SIZE, MPI_INT, 0, 0, MPI_COMM_WORLD);
+		if(myRank != 0)
+		{
+			MPI_Send(myBestSolution, ARRAY_SIZE, MPI_INT, 0, 0, MPI_COMM_WORLD);
+		}
 	}
 
 	if(myRank == 0)
 	{
 		int* globalBestSolution = calloc(ARRAY_SIZE, sizeof(int));
-		MPI_Recv(globalBestSolution, ARRAY_SIZE, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		if(myBestCost == globalBestCost)
+		{
+			memcpy(globalBestSolution, myBestSolution, ARRAY_SIZE * sizeof(int));
+		}
+		else
+		{
+			MPI_Recv(globalBestSolution, ARRAY_SIZE, MPI_INT, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+		}
 
 		time(&end);
 		//Print the best solution
@@ -196,3 +212,44 @@ void pairwiseExchange(int* solution)
 	solution[j] = temp;
 }
 
+void cycleOfThree(int* solution)
+{
+	int i = rand() % ARRAY_SIZE;
+	int j = rand() % ARRAY_SIZE;
+	int k = rand() % ARRAY_SIZE;
+	int temp = solution[i];
+	solution[i] = solution[j];
+	solution[j] = solution[k];
+	solution[k] = temp;
+}
+
+void inversionPerturbation(int* solution)
+{
+	int i = rand() % ARRAY_SIZE;
+	int j = rand() % ARRAY_SIZE;
+	int temp;
+	while(i < j)
+	{
+		temp = solution[i];
+		solution[i] = solution[j];
+		solution[j] = temp;
+		i++;
+		j--;
+	}
+}
+
+void swapBlockPair(int* solution)
+{
+	int i = rand() % ARRAY_SIZE;
+	int j = rand() % ARRAY_SIZE;
+	int k = rand() % ARRAY_SIZE;
+	int temp;
+	while(i < j)
+	{
+		temp = solution[i];
+		solution[i] = solution[k];
+		solution[k] = temp;
+		i++;
+		k++;
+	}
+}
