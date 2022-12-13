@@ -21,3 +21,4 @@ add_executable(Part2SA TSP_SA.c)
 add_executable(Part2SAMPI TSP_SA_MPI.c)
 
 target_link_libraries(Part1MPI PUBLIC MPI::MPI_C)
+target_link_libraries(Part2SAMPI PUBLIC MPI::MPI_C)
