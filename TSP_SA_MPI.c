@@ -121,9 +121,6 @@ int main(int argc, char* argv[])
 			iterationsWithoutImprovement++;
 		}
 
-		//cool the system
-		temperature *= (1 - coolingRate);
-
 		//kick if it is stuck
 		if(iterationsWithoutImprovement > maxIterationsWithoutImprovement)
 		{
