@@ -16,6 +16,8 @@ void pairwiseExchange(int* solution);
 
 int main(int argc, char* argv[])
 {
+	long long int itrs = 0;
+	long long int totalItrs = 0;
 	int myRank, commSize;
 
 	MPI_Init(&argc, &argv);
@@ -90,6 +92,7 @@ int main(int argc, char* argv[])
 	//Loop until the stopping condition is met
 	while(!stop)
 	{
+		itrs++;
 		//create perturbation
 		memcpy(pertSolution, myCurrentSolution, ARRAY_SIZE * sizeof(int));
 		pairwiseExchange(pertSolution);
@@ -171,6 +174,12 @@ int main(int argc, char* argv[])
 		printf("\n");
 		printf("Best cost: %d\n", globalBestCost);
 		printf("Time: %f\n", difftime(end, start));
+	}
+	MPI_Reduce(&itrs, &totalItrs, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+
+	if(myRank == 0)
+	{
+		printf("Total iterations: %lld\n", totalItrs);
 	}
 
 	MPI_Finalize();

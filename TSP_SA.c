@@ -15,6 +15,7 @@ void pairwiseExchange(int* solution);
 
 int main(int argc, char* argv[])
 {
+	long long int itrs = 0;
 	time_t start, end, now;
 	char fileName[50];
 	uint8_t* a = calloc(ARRAY_SIZE * ARRAY_SIZE, sizeof(uint8_t));
@@ -63,10 +64,7 @@ int main(int argc, char* argv[])
 	//Calculate the cost of the initial solution
 	int currCost = cost(currentSolution, a);
 
-	//Set the initial temperature
-	double temperature = 1000;
-	//Set the cooling rate
-	double coolingRate = 0.003;
+
 	//Set the number of iterations without improvement
 	int iterationsWithoutImprovement = 0;
 	//Set the maximum number of iterations without improvement
@@ -83,6 +81,7 @@ int main(int argc, char* argv[])
 	//Loop until the stopping condition is met
 	while(!stop)
 	{
+		itrs++;
 		//create perturbation
 		memcpy(pertSolution, currentSolution, ARRAY_SIZE * sizeof(int));
 		pairwiseExchange(pertSolution);
@@ -112,9 +111,6 @@ int main(int argc, char* argv[])
 			iterationsWithoutImprovement++;
 		}
 
-		//cool the system
-		temperature *= (1 - coolingRate);
-
 		//kick if it is stuck
 		if(iterationsWithoutImprovement > maxIterationsWithoutImprovement)
 		{
@@ -141,6 +137,8 @@ int main(int argc, char* argv[])
 	printf("\n");
 	printf("Best cost: %d\n", bestCost);
 	printf("Time: %f\n", difftime(end, start));
+	printf("Iterations: %lld\n", itrs);
+
 }
 
 
